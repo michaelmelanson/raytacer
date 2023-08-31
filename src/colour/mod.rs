@@ -41,10 +41,24 @@ impl std::ops::Add<Colour> for Colour {
     }
 }
 
+impl std::ops::AddAssign<Colour> for Colour {
+    fn add_assign(&mut self, rhs: Colour) {
+        *self = Colour(self.0 + rhs.0)
+    }
+}
+
 impl std::ops::Mul<f64> for Colour {
     type Output = Colour;
 
     fn mul(self, rhs: f64) -> Self::Output {
         Colour(self.0 * rhs)
+    }
+}
+
+impl std::ops::Div<f64> for Colour {
+    type Output = Colour;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Colour(self.0 / rhs)
     }
 }

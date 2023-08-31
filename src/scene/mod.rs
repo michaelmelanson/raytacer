@@ -11,30 +11,40 @@ pub struct Scene {
     pub geometries: Vec<Geometry>,
 }
 impl Scene {
-    pub(crate) fn render_pixel(&self, coord: (usize, usize)) -> crate::colour::Colour {
-        let ray = self.camera.screen_to_world(coord);
-        let hit = self.hit_test(&ray);
+    pub(crate) fn render_pixel(
+        &self,
+        coord: (usize, usize),
+        samples: usize,
+    ) -> crate::colour::Colour {
+        let mut colour = Colour::default();
 
-        if let Some(hit) = hit {
-            match hit.material {
-                Material::ScreenSpaceGradient => {
-                    let a = (ray.direction.unit().y() + 1.0) * 0.5;
-                    Colour::new(1.0, 1.0, 1.0) * (1.0 - a) + Colour::new(0.5, 0.7, 1.0) * a
-                }
+        for _ in 0..samples {
+            let ray = self.camera.screen_to_world_sampled(coord);
+            let hit = self.hit_test(&ray);
 
-                Material::NormalSpaceGradient => {
-                    Colour::new(
-                        hit.normal.x() + 1.,
-                        hit.normal.y() + 1.,
-                        hit.normal.z() + 1.,
-                    ) * 0.5
-                }
+            if let Some(hit) = hit {
+                colour += match hit.material {
+                    Material::ScreenSpaceGradient => {
+                        let a = (ray.direction.unit().y() + 1.0) * 0.5;
+                        Colour::new(1.0, 1.0, 1.0) * (1.0 - a) + Colour::new(0.5, 0.7, 1.0) * a
+                    }
 
-                Material::SolidColour(colour) => colour,
+                    Material::NormalSpaceGradient => {
+                        Colour::new(
+                            hit.normal.x() + 1.,
+                            hit.normal.y() + 1.,
+                            hit.normal.z() + 1.,
+                        ) * 0.5
+                    }
+
+                    Material::SolidColour(colour) => colour,
+                };
+            } else {
+                colour += Colour::new(1., 0., 1.);
             }
-        } else {
-            Colour::new(1., 0., 1.)
         }
+
+        colour / (samples as f64)
     }
 
     pub fn hit_test(&self, ray: &Ray) -> Option<Hit> {

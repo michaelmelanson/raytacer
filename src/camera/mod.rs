@@ -1,4 +1,10 @@
+mod len;
+
+use rand::random;
+
 use crate::{ray::Ray, vec::Vec3};
+
+pub use self::len::CameraLens;
 
 pub struct Camera {
     eye: Ray,
@@ -50,12 +56,26 @@ impl Camera {
             }
         }
     }
-}
 
-pub enum CameraLens {
-    Orthogonal {
-        pixel0_loc: Vec3,
-        pixel_delta_u: Vec3,
-        pixel_delta_v: Vec3,
-    },
+    pub fn screen_to_world_sampled(&self, coord: (usize, usize)) -> Ray {
+        let ray = self.screen_to_world(coord);
+
+        match self.lens {
+            CameraLens::Orthogonal {
+                pixel_delta_u,
+                pixel_delta_v,
+                ..
+            } => {
+                // Returns a random point in the square surrounding a pixel at the origin.
+                let px = -0.5 + random::<f64>();
+                let py = -0.5 + random::<f64>();
+                let sample = (pixel_delta_u * px) + (pixel_delta_v * py);
+
+                Ray {
+                    origin: ray.origin,
+                    direction: ray.direction + sample,
+                }
+            }
+        }
+    }
 }

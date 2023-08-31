@@ -62,7 +62,7 @@ fn main() {
             let x = index % image_width;
             let y = index / image_width;
 
-            *pixel = scene.render_pixel((x, y));
+            *pixel = scene.render_pixel((x, y), 100);
         });
 
     write_to_png::<RGB>("output.png", &pixels, (image_width, image_height));
