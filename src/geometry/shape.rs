@@ -23,7 +23,7 @@ impl Shape {
                 }
 
                 let sqrt_d = discriminant.sqrt();
-                let mut t = -half_b - sqrt_d / a;
+                let mut t = (-half_b - sqrt_d) / a;
                 if !t_range.contains(&t) {
                     t = (-half_b + sqrt_d) / a;
 
