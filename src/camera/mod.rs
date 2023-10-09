@@ -1,11 +1,11 @@
-mod len;
+mod lens;
 
 use rand::random;
 use serde::{Deserialize, Serialize};
 
 use crate::{ray::Ray, vec::Vec3};
 
-pub use self::len::CameraLens;
+pub use self::lens::CameraLens;
 
 #[derive(Serialize, Deserialize)]
 pub struct Camera {
