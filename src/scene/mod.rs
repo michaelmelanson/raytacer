@@ -37,7 +37,6 @@ impl Scene {
                     best_t = t;
                     best_hit = Some(Hit {
                         material: geo.material,
-                        t,
                         point: ray.at(t),
                         normal,
                         front_face,
