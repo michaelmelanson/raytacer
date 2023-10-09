@@ -14,3 +14,6 @@ rand = "0.8.5"
 rayon = "1.7.0"
 serde = { version = "1.0.188", features = ["derive"] }
 serde_yaml = "0.9.25"
+
+[[bin]]
+name = "raytracer"

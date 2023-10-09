@@ -11,12 +11,9 @@ pub struct Scene {
     pub camera: Camera,
     pub geometries: Vec<Geometry>,
 }
+
 impl Scene {
-    pub(crate) fn render_pixel(
-        &self,
-        coord: (usize, usize),
-        samples: usize,
-    ) -> crate::colour::Colour {
+    pub fn render_pixel(&self, coord: (usize, usize), samples: usize) -> crate::colour::Colour {
         let mut colour = Colour::black();
 
         for _ in 0..samples {

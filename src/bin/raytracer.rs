@@ -1,26 +1,19 @@
-use std::fs::File;
+extern crate raytacer;
 
-use camera::Camera;
 use clap::Parser;
-use colour::Colour;
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
-use pixel::{Pixel, RGB};
 use png::ScaledFloat;
-use ray::Ray;
 use rayon::prelude::*;
-use scene::Scene;
-use vec::Vec3;
-
-use crate::geometry::Geometry;
-
-mod camera;
-mod colour;
-mod geometry;
-mod hit;
-mod pixel;
-mod ray;
-mod scene;
-mod vec;
+use raytacer::{
+    camera::Camera,
+    colour::Colour,
+    geometry::Geometry,
+    pixel::{Pixel, RGB},
+    ray::Ray,
+    scene::Scene,
+    vec::Vec3,
+};
+use std::fs::File;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
