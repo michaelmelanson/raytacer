@@ -6,7 +6,7 @@ use crate::vec::Vec3;
 pub struct Colour(Vec3);
 
 impl Colour {
-    pub(crate) fn new(r: f64, g: f64, b: f64) -> Colour {
+    pub fn new(r: f64, g: f64, b: f64) -> Colour {
         Colour(Vec3::new((r, g, b)))
     }
 
@@ -35,6 +35,16 @@ impl Colour {
     #[allow(unused)]
     pub fn red() -> Colour {
         Colour::new(1., 0., 0.)
+    }
+
+    pub fn random(min: f64, max: f64) -> Colour {
+        let range = max - min;
+
+        let r = (rand::random::<f64>() * range) + min;
+        let g = (rand::random::<f64>() * range) + min;
+        let b = (rand::random::<f64>() * range) + min;
+
+        Colour::new(r, g, b)
     }
 }
 

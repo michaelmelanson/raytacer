@@ -17,3 +17,6 @@ serde_yaml = "0.9.25"
 
 [[bin]]
 name = "raytracer"
+
+[[bin]]
+name = "create_scene"

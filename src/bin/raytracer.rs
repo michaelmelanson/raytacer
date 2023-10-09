@@ -93,64 +93,6 @@ fn main() {
 }
 
 fn load_geometries(path: &str) -> anyhow::Result<Vec<Geometry>> {
-    // let mut geometries = Vec::new();
-
-    // // ground
-    // geometries.push(Geometry {
-    //     shape: Shape::Sphere {
-    //         centre: Vec3::new((0., -100.5, -1.)),
-    //         radius: 100.,
-    //     },
-    //     material: Material::Lambertian {
-    //         colour: Colour::new(0.8, 0.8, 0.0),
-    //         albedo: 0.5,
-    //     },
-    // });
-
-    // // center
-    // geometries.push(Geometry {
-    //     shape: Shape::Sphere {
-    //         centre: Vec3::new((0., 0., -1.)),
-    //         radius: 0.5,
-    //     },
-    //     material: Material::Lambertian {
-    //         colour: Colour::new(0.7, 0.3, 0.3),
-    //         albedo: 0.5,
-    //     },
-    // });
-
-    // // left
-    // geometries.push(Geometry {
-    //     shape: Shape::Sphere {
-    //         centre: Vec3::new((-1., 0., -1.)),
-    //         radius: 0.5,
-    //     },
-    //     material: Material::Metal {
-    //         tint: Colour::new(0.8, 0.8, 0.8),
-    //         scatter: 0.3,
-    //     },
-    // });
-
-    // // right
-    // geometries.push(Geometry {
-    //     shape: Shape::Sphere {
-    //         centre: Vec3::new((1., 0., -1.)),
-    //         radius: 0.5,
-    //     },
-    //     material: Material::Metal {
-    //         tint: Colour::new(0.8, 0.6, 0.2),
-    //         scatter: 1.0,
-    //     },
-    // });
-
-    // // sky
-    // geometries.push(Geometry {
-    //     shape: Shape::Background,
-    //     material: Material::ScreenSpaceGradient,
-    // });
-
-    // geometries
-
     let file = File::open(path)?;
     let geometries = serde_yaml::from_reader(file)?;
 
