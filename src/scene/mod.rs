@@ -70,8 +70,8 @@ impl Scene {
                     ) * 0.5
                 }
 
-                Material::SolidColour(colour) => colour,
-                Material::Diffuse(colour, albedo) => {
+                Material::SolidColour { colour } => colour,
+                Material::Diffuse { colour, albedo } => {
                     let reflected_direction = Vec3::random_on_hemisphere(&hit.normal);
                     let reflected_ray = Ray {
                         origin: hit.point,
@@ -81,7 +81,7 @@ impl Scene {
                         self.ray_colour(&reflected_ray, max_bounces - 1) * albedo;
                     colour * reflected_colour
                 }
-                Material::Lambertian(colour, albedo) => {
+                Material::Lambertian { colour, albedo } => {
                     let reflected_direction = Vec3::random_on_hemisphere(&hit.normal);
                     let reflected_ray = Ray {
                         origin: hit.point,
@@ -91,7 +91,7 @@ impl Scene {
                         self.ray_colour(&reflected_ray, max_bounces - 1) * albedo;
                     colour * reflected_colour
                 }
-                Material::Metal(tint, scatter) => {
+                Material::Metal { tint, scatter } => {
                     let reflected_direction =
                         ray.direction.reflect(&hit.normal) + Vec3::random_unit_vector() * scatter;
 

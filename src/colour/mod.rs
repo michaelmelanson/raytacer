@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use crate::vec::Vec3;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct Colour(Vec3);
 
 impl Colour {

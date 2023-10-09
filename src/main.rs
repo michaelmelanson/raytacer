@@ -1,6 +1,8 @@
+use std::fs::File;
+
 use camera::Camera;
+use clap::Parser;
 use colour::Colour;
-use geometry::{Material, Shape};
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use pixel::{Pixel, RGB};
 use png::ScaledFloat;
@@ -20,62 +22,59 @@ mod ray;
 mod scene;
 mod vec;
 
-fn main() {
-    let image_width = 400;
-    let image_height = 225;
-    let image_size: usize = image_width * image_height;
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct CliArguments {
+    geometry_path: String,
 
+    #[arg(
+        short = 'o',
+        long = "output",
+        help = "Path to write the output image to",
+        default_value = "./output.png"
+    )]
+    output_path: String,
+
+    #[arg(
+        short = 'w',
+        long = "width",
+        help = "Width of the output image in pixels",
+        default_value = "400"
+    )]
+    width: usize,
+
+    #[arg(
+        short = 'h',
+        long = "height",
+        help = "Height of the output image in pixels",
+        default_value = "255"
+    )]
+    height: usize,
+
+    #[arg(
+        short = 's',
+        long = "samples",
+        help = "How many rays to trace per pixel",
+        default_value = "500"
+    )]
+    samples_per_pixel: usize,
+}
+
+fn main() {
+    let args = CliArguments::parse();
     let camera = Camera::orthogonal(
         Ray::new(Vec3::new((0., 0., 0.)), Vec3::new((0., 0., -1.))),
         1.,
-        (image_width, image_height),
+        (args.width, args.height),
     );
 
-    let mut geometries = Vec::new();
-
-    // ground
-    geometries.push(Geometry {
-        shape: Shape::Sphere {
-            centre: Vec3::new((0., -100.5, -1.)),
-            radius: 100.,
-        },
-        material: Material::Lambertian(Colour::new(0.8, 0.8, 0.0), 0.5),
-    });
-
-    // center
-    geometries.push(Geometry {
-        shape: Shape::Sphere {
-            centre: Vec3::new((0., 0., -1.)),
-            radius: 0.5,
-        },
-        material: Material::Lambertian(Colour::new(0.7, 0.3, 0.3), 0.5),
-    });
-
-    // left
-    geometries.push(Geometry {
-        shape: Shape::Sphere {
-            centre: Vec3::new((-1., 0., -1.)),
-            radius: 0.5,
-        },
-        material: Material::Metal(Colour::new(0.8, 0.8, 0.8), 0.3),
-    });
-
-    // right
-    geometries.push(Geometry {
-        shape: Shape::Sphere {
-            centre: Vec3::new((1., 0., -1.)),
-            radius: 0.5,
-        },
-        material: Material::Metal(Colour::new(0.8, 0.6, 0.2), 1.0),
-    });
-
-    // sky
-    geometries.push(Geometry {
-        shape: Shape::Background,
-        material: Material::ScreenSpaceGradient,
-    });
+    let geometries = load_geometries(&args.geometry_path).expect(&format!(
+        "failed to load geometries from '{}'",
+        args.geometry_path
+    ));
 
     let scene = Scene { camera, geometries };
+    let image_size = args.width * args.height;
 
     let mut pixels = Vec::new();
     pixels.resize(image_size, Colour::default());
@@ -91,13 +90,78 @@ fn main() {
         .enumerate()
         .progress_with(progress)
         .for_each(|(index, pixel)| {
-            let x = index % image_width;
-            let y = index / image_width;
+            let x = index % args.width;
+            let y = index / args.width;
 
-            *pixel = scene.render_pixel((x, y), 500);
+            *pixel = scene.render_pixel((x, y), args.samples_per_pixel);
         });
 
-    write_to_png::<RGB>("output.png", &pixels, (image_width, image_height));
+    write_to_png::<RGB>(&args.output_path, &pixels, (args.width, args.height));
+}
+
+fn load_geometries(path: &str) -> anyhow::Result<Vec<Geometry>> {
+    // let mut geometries = Vec::new();
+
+    // // ground
+    // geometries.push(Geometry {
+    //     shape: Shape::Sphere {
+    //         centre: Vec3::new((0., -100.5, -1.)),
+    //         radius: 100.,
+    //     },
+    //     material: Material::Lambertian {
+    //         colour: Colour::new(0.8, 0.8, 0.0),
+    //         albedo: 0.5,
+    //     },
+    // });
+
+    // // center
+    // geometries.push(Geometry {
+    //     shape: Shape::Sphere {
+    //         centre: Vec3::new((0., 0., -1.)),
+    //         radius: 0.5,
+    //     },
+    //     material: Material::Lambertian {
+    //         colour: Colour::new(0.7, 0.3, 0.3),
+    //         albedo: 0.5,
+    //     },
+    // });
+
+    // // left
+    // geometries.push(Geometry {
+    //     shape: Shape::Sphere {
+    //         centre: Vec3::new((-1., 0., -1.)),
+    //         radius: 0.5,
+    //     },
+    //     material: Material::Metal {
+    //         tint: Colour::new(0.8, 0.8, 0.8),
+    //         scatter: 0.3,
+    //     },
+    // });
+
+    // // right
+    // geometries.push(Geometry {
+    //     shape: Shape::Sphere {
+    //         centre: Vec3::new((1., 0., -1.)),
+    //         radius: 0.5,
+    //     },
+    //     material: Material::Metal {
+    //         tint: Colour::new(0.8, 0.6, 0.2),
+    //         scatter: 1.0,
+    //     },
+    // });
+
+    // // sky
+    // geometries.push(Geometry {
+    //     shape: Shape::Background,
+    //     material: Material::ScreenSpaceGradient,
+    // });
+
+    // geometries
+
+    let file = File::open(path)?;
+    let geometries = serde_yaml::from_reader(file)?;
+
+    Ok(geometries)
 }
 
 fn write_to_png<P: Pixel>(path: &str, pixels: &[Colour], dimensions: (usize, usize)) {

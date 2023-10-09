@@ -1,0 +1,50 @@
+- shape: !Sphere
+    centre:
+      - 0.0
+      - -100.5
+      - -1.0
+    radius: 100.0
+  material: !Lambertian
+    colour:
+      - 0.8
+      - 0.8
+      - 0.0
+    albedo: 0.5
+- shape: !Sphere
+    centre:
+      - 0.0
+      - 0.0
+      - -1.0
+    radius: 0.5
+  material: !Lambertian
+    colour:
+      - 0.7
+      - 0.3
+      - 0.3
+    albedo: 0.5
+- shape: !Sphere
+    centre:
+      - -1.0
+      - 0.0
+      - -1.0
+    radius: 0.5
+  material: !Metal
+    tint:
+      - 0.8
+      - 0.8
+      - 0.8
+    scatter: 0.3
+- shape: !Sphere
+    centre:
+      - 1.0
+      - 0.0
+      - -1.0
+    radius: 0.5
+  material: !Metal
+    tint:
+      - 0.8
+      - 0.6
+      - 0.2
+    scatter: 1.0
+- shape: Background
+  material: ScreenSpaceGradient

@@ -1,8 +1,10 @@
 use std::ops::Range;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{ray::Ray, vec::Vec3};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 pub enum Shape {
     Background,
     Sphere { centre: Vec3, radius: f64 },

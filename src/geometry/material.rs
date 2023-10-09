@@ -1,17 +1,19 @@
+use serde::{Deserialize, Serialize};
+
 use crate::colour::Colour;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize, Deserialize)]
 #[allow(unused)]
 pub enum Material {
     // debugging
     ScreenSpaceGradient,
     NormalSpaceGradient,
-    SolidColour(Colour),
+    SolidColour { colour: Colour },
 
     // diffuse models
-    Diffuse(Colour, f64),
-    Lambertian(Colour, f64),
+    Diffuse { colour: Colour, albedo: f64 },
+    Lambertian { colour: Colour, albedo: f64 },
 
     // reflective models
-    Metal(Colour, f64),
+    Metal { tint: Colour, scatter: f64 },
 }
