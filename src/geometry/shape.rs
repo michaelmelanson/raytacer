@@ -10,9 +10,9 @@ pub enum Shape {
     Sphere { centre: Vec3, radius: f64 },
 }
 impl Shape {
-    pub fn hit_test(&self, ray: &Ray, t_range: Range<f64>) -> Option<(f64, Vec3)> {
+    pub fn hit_test(&self, ray: &Ray, t_range: Range<f64>) -> Option<(f64, Vec3, bool)> {
         match self {
-            Shape::Background => Some((f64::INFINITY, Vec3::new((0., 0., 0.)))),
+            Shape::Background => Some((f64::INFINITY, Vec3::new((0., 0., 0.)), true)),
             Shape::Sphere { centre, radius } => {
                 let oc = ray.origin - *centre;
                 let a = ray.direction.length_squared();
@@ -34,8 +34,17 @@ impl Shape {
                     }
                 }
 
-                let normal = (ray.at(t) - *centre) / *radius;
-                Some((t, normal))
+                let mut normal = (ray.at(t) - *centre) / *radius;
+                let front_face;
+
+                if ray.direction.dot(&normal) > 0.0 {
+                    normal = -normal;
+                    front_face = false;
+                } else {
+                    front_face = true;
+                }
+
+                Some((t, normal, front_face))
             }
         }
     }

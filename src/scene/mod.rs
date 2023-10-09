@@ -32,7 +32,7 @@ impl Scene {
         let mut best_hit = None;
 
         for geo in &self.geometries {
-            if let Some((t, normal)) = geo.shape.hit_test(ray, (0.001)..best_t) {
+            if let Some((t, normal, front_face)) = geo.shape.hit_test(ray, (0.001)..best_t) {
                 if t <= best_t {
                     best_t = t;
                     best_hit = Some(Hit {
@@ -40,6 +40,7 @@ impl Scene {
                         t,
                         point: ray.at(t),
                         normal,
+                        front_face,
                     });
                 }
             }
@@ -107,9 +108,41 @@ impl Scene {
                     let reflected_colour = self.ray_colour(&reflected_ray, max_bounces - 1);
                     tint * reflected_colour
                 }
+
+                Material::Dialectric { ior } => {
+                    let refraction_ratio = if hit.front_face { 1.0 / ior } else { ior };
+
+                    let unit_direction = ray.direction.unit();
+
+                    let cos_theta = f64::min(-unit_direction.dot(&hit.normal), 1.0);
+                    let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+                    let cannot_refract = refraction_ratio * sin_theta > 1.0;
+
+                    let outgoing_direction = if cannot_refract {
+                        ray.direction.reflect(&hit.normal)
+                    } else {
+                        refract(unit_direction, hit.normal, refraction_ratio)
+                    };
+
+                    let outgoing_ray = Ray {
+                        origin: hit.point,
+                        direction: outgoing_direction,
+                    };
+
+                    self.ray_colour(&outgoing_ray, max_bounces - 1)
+                }
             }
         } else {
             Colour::new(1., 0., 1.)
         }
     }
+}
+
+fn refract(uv: Vec3, n: Vec3, refraction_ratio: f64) -> Vec3 {
+    let cos_theta = f64::min(-uv.dot(&n), 1.0);
+    let r_out_perp = (uv + n * cos_theta) * refraction_ratio;
+    let r_out_parallel = n * -((1.0 - r_out_perp.length_squared()).abs()).sqrt();
+
+    r_out_perp + r_out_parallel
 }

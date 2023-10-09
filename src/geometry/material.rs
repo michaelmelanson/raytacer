@@ -16,4 +16,7 @@ pub enum Material {
 
     // reflective models
     Metal { tint: Colour, scatter: f64 },
+
+    // transmissive models
+    Dialectric { ior: f64 },
 }

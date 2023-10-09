@@ -1,0 +1,65 @@
+# ground
+- shape: !Sphere
+    centre:
+      - 0.0
+      - -100.5
+      - -1.0
+    radius: 100.0
+  material: !Lambertian
+    colour:
+      - 0.8
+      - 0.8
+      - 0.0
+    albedo: 0.5
+
+# middle
+- shape: !Sphere
+    centre:
+      - 0.0
+      - 0.0
+      - -1.0
+    radius: 0.5
+  material: !Lambertian
+    colour:
+      - 0.1
+      - 0.2
+      - 0.5
+    albedo: 0.5
+
+# left
+- shape: !Sphere
+    centre:
+      - -1.0
+      - 0.0
+      - -1.0
+    radius: 0.5
+  material: !Dialectric
+    ior: 1.5
+
+# left (inner)
+- shape: !Sphere
+    centre:
+      - -1.0
+      - 0.0
+      - -1.0
+    radius: -0.4
+  material: !Dialectric
+    ior: 1.5
+
+# right
+- shape: !Sphere
+    centre:
+      - 1.0
+      - 0.0
+      - -1.0
+    radius: 0.5
+  material: !Metal
+    tint:
+      - 0.8
+      - 0.6
+      - 0.2
+    scatter: 0.0
+
+# sky
+- shape: Background
+  material: ScreenSpaceGradient
