@@ -1,3 +1,4 @@
+# ground
 - shape: !Sphere
     centre:
       - 0.0
@@ -10,6 +11,8 @@
       - 0.8
       - 0.0
     albedo: 0.5
+
+# middle
 - shape: !Sphere
     centre:
       - 0.0
@@ -21,7 +24,9 @@
       - 0.7
       - 0.3
       - 0.3
-    albedo: 0.5
+    albedo: 0.8
+
+# left
 - shape: !Sphere
     centre:
       - -1.0
@@ -34,6 +39,8 @@
       - 0.8
       - 0.8
     scatter: 0.3
+
+# right
 - shape: !Sphere
     centre:
       - 1.0
@@ -45,6 +52,8 @@
       - 0.8
       - 0.6
       - 0.2
-    scatter: 1.0
+    scatter: 0.0
+
+# sky
 - shape: Background
   material: ScreenSpaceGradient
