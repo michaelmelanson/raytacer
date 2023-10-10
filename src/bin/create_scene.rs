@@ -122,7 +122,7 @@ fn generate_random_spheres() -> Vec<Geometry> {
 
     geometries.push(Geometry {
         shape: Shape::Sphere {
-            centre: Vec3::new((-4.0, 1.0, 0.0)),
+            centre: Vec3::new((4.0, 1.0, 0.0)),
             radius: 1.0,
         },
         material: Material::Metal {

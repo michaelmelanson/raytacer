@@ -5,11 +5,10 @@ use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use png::ScaledFloat;
 use rayon::prelude::*;
 use raytacer::{
-    camera::Camera,
+    camera::CameraConfig,
     colour::Colour,
     geometry::Geometry,
     pixel::{Pixel, RGB},
-    ray::Ray,
     scene::Scene,
     vec::Vec3,
 };
@@ -21,6 +20,7 @@ struct CliArguments {
     geometry_path: String,
 
     #[arg(
+        help_heading = "Image",
         short = 'o',
         long = "output",
         help = "Path to write the output image to",
@@ -29,6 +29,7 @@ struct CliArguments {
     output_path: String,
 
     #[arg(
+        help_heading = "Image",
         short = 'w',
         long = "width",
         help = "Width of the output image in pixels",
@@ -37,6 +38,7 @@ struct CliArguments {
     width: usize,
 
     #[arg(
+        help_heading = "Image",
         short = 'h',
         long = "height",
         help = "Height of the output image in pixels",
@@ -45,21 +47,59 @@ struct CliArguments {
     height: usize,
 
     #[arg(
+        help_heading = "Image",
         short = 's',
         long = "samples",
         help = "How many rays to trace per pixel",
         default_value = "500"
     )]
     samples_per_pixel: usize,
+
+    #[arg(
+        help_heading = "Camera",
+        long = "fov",
+        help = "Field of view in degrees",
+        default_value = "45"
+    )]
+    camera_fov: f64,
+
+    #[arg(
+        help_heading = "Camera",
+        long = "look-from",
+        help = "Camera position in comma-separated X,Y,Z coordinates",
+        default_value = "-2,2,1"
+    )]
+    camera_origin: Vec3,
+
+    #[arg(
+        help_heading = "Camera",
+        long = "look-at",
+        help = "Camera target in comma-separated X,Y,Z coordinates",
+        default_value = "0,0,-1"
+    )]
+    camera_look_at: Vec3,
+
+    #[arg(
+        help_heading = "Camera",
+        long = "look-at",
+        help = "Camera up vector in comma-separated X,Y,Z coordinates",
+        default_value = "0,1,0"
+    )]
+    camera_up: Vec3,
 }
 
 fn main() {
     let args = CliArguments::parse();
-    let camera = Camera::orthogonal(
-        Ray::new(Vec3::new((0., 0., 0.)), Vec3::new((0., 0., -1.))),
-        1.,
-        (args.width, args.height),
-    );
+
+    let camera = CameraConfig::Orthogonal {
+        look_from: args.camera_origin,
+        look_at: args.camera_look_at,
+        up: args.camera_up,
+        fov_degrees: args.camera_fov,
+        image_width: args.width,
+        image_height: args.height,
+    }
+    .into();
 
     let geometries = load_geometries(&args.geometry_path).expect(&format!(
         "failed to load geometries from '{}'",
@@ -106,7 +146,7 @@ fn write_to_png<P: Pixel>(path: &str, pixels: &[Colour], dimensions: (usize, usi
     let mut encoder = png::Encoder::new(writer, dimensions.0 as u32, dimensions.1 as u32);
     encoder.set_color(P::png_color_type());
     encoder.set_depth(P::png_bit_depth());
-    encoder.set_source_gamma(ScaledFloat::new(1.0));
+    encoder.set_source_gamma(ScaledFloat::new(1.33));
 
     let mut data = Vec::new();
     data.resize(pixels.len() * P::WIDTH, 0);

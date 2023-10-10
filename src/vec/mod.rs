@@ -1,7 +1,8 @@
+use clap::builder::TypedValueParser;
 use rand::{distributions::Uniform, prelude::Distribution, thread_rng};
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct Vec3(f64, f64, f64);
 
 impl Vec3 {
@@ -130,5 +131,66 @@ impl std::ops::Div<f64> for Vec3 {
 
     fn div(self, rhs: f64) -> Vec3 {
         Vec3(self.0 / rhs, self.1 / rhs, self.2 / rhs)
+    }
+}
+
+impl clap::builder::ValueParserFactory for Vec3 {
+    type Parser = Vec3Parser;
+
+    fn value_parser() -> Self::Parser {
+        Vec3Parser
+    }
+}
+
+#[derive(Clone)]
+pub struct Vec3Parser;
+
+impl TypedValueParser for Vec3Parser {
+    type Value = Vec3;
+
+    fn parse_ref(
+        &self,
+        _cmd: &clap::Command,
+        _arg: Option<&clap::Arg>,
+        value: &std::ffi::OsStr,
+    ) -> Result<Self::Value, clap::Error> {
+        let Some(value) = value.to_str() else {
+            return Err(clap::Error::new(clap::error::ErrorKind::ValueValidation));
+        };
+
+        let mut parts = Vec::new();
+
+        let mut part = String::new();
+        for c in value.chars() {
+            if c == ',' {
+                parts.push(part.clone());
+                part.clear();
+                continue;
+            }
+
+            part.push(c);
+        }
+
+        parts.push(part);
+
+        if parts.len() != 3 {
+            return Err(clap::Error::new(clap::error::ErrorKind::ValueValidation));
+        }
+
+        let Ok(x) = str::parse::<f64>(&parts[0]) else {
+            return Err(clap::Error::new(clap::error::ErrorKind::ValueValidation));
+        };
+
+        let Ok(y) = str::parse::<f64>(&parts[1]) else {
+            return Err(clap::Error::new(clap::error::ErrorKind::ValueValidation));
+        };
+
+        let Ok(z) = str::parse::<f64>(&parts[2]) else {
+            return Err(clap::Error::new(clap::error::ErrorKind::ValueValidation));
+        };
+
+        let vec = Vec3::new((x, y, z));
+
+        Ok(vec)
     }
 }
