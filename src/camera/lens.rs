@@ -8,5 +8,6 @@ pub enum CameraLens {
         pixel0_loc: Vec3,
         pixel_delta_u: Vec3,
         pixel_delta_v: Vec3,
+        defocus_disc_uv: Option<(Vec3, Vec3)>,
     },
 }

@@ -86,16 +86,37 @@ struct CliArguments {
         default_value = "0,1,0"
     )]
     camera_up: Vec3,
+
+    #[arg(
+        help_heading = "Camera",
+        long = "defocus_angle",
+        help = "Angle of dispersion for out of focus objects",
+        default_value = "0.6"
+    )]
+    camera_defocus_angle: f64,
+
+    #[arg(
+        help_heading = "Camera",
+        long = "focus_distance",
+        help = "Fixed focus distance. If not specified, it focuses on 'look-at' point."
+    )]
+    camera_focus_distance: Option<f64>,
 }
 
 fn main() {
     let args = CliArguments::parse();
+
+    let focus_dist = args
+        .camera_focus_distance
+        .unwrap_or_else(|| (args.camera_look_at - args.camera_origin).length());
 
     let camera = CameraConfig::Orthogonal {
         look_from: args.camera_origin,
         look_at: args.camera_look_at,
         up: args.camera_up,
         fov_degrees: args.camera_fov,
+        defocus_angle: args.camera_defocus_angle,
+        focus_dist,
         image_width: args.width,
         image_height: args.height,
     }

@@ -1,7 +1,7 @@
 mod lens;
 
 use crate::{ray::Ray, vec::Vec3};
-use rand::random;
+use rand::{random, Rng};
 
 pub use self::lens::CameraLens;
 
@@ -11,7 +11,8 @@ pub enum CameraConfig {
         look_at: Vec3,
         up: Vec3,
         fov_degrees: f64,
-
+        defocus_angle: f64,
+        focus_dist: f64,
         image_width: usize,
         image_height: usize,
     },
@@ -25,14 +26,15 @@ impl Into<Camera> for CameraConfig {
                 look_at,
                 up,
                 fov_degrees,
+                defocus_angle,
+                focus_dist,
                 image_width,
                 image_height,
             } => {
-                let focal_length = 1.;
                 let theta = fov_degrees.to_radians();
                 let h = (theta / 2.).tan();
 
-                let viewport_height = 2. * h * focal_length;
+                let viewport_height = 2. * h * focus_dist;
                 let viewport_width =
                     viewport_height * ((image_width as f64) / (image_height as f64));
 
@@ -44,11 +46,21 @@ impl Into<Camera> for CameraConfig {
                 let viewport_v = -v * viewport_height;
 
                 let viewport_upper_left =
-                    look_from - (w * focal_length) - (viewport_u / 2.) - (viewport_v / 2.);
+                    look_from - (w * focus_dist) - (viewport_u / 2.) - (viewport_v / 2.);
 
                 let pixel_delta_u = viewport_u / (image_width as f64);
                 let pixel_delta_v = viewport_v / (image_height as f64);
                 let pixel0_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
+
+                let defocus_disc_uv = if defocus_angle > 0. {
+                    let defocus_radius = focus_dist * (defocus_angle / 2.).to_radians().tan();
+                    let defocus_disc_u = u * defocus_radius;
+                    let defocus_disc_v = v * defocus_radius;
+
+                    Some((defocus_disc_u, defocus_disc_v))
+                } else {
+                    None
+                };
 
                 let eye = Ray {
                     origin: look_from,
@@ -59,6 +71,7 @@ impl Into<Camera> for CameraConfig {
                     pixel0_loc,
                     pixel_delta_u,
                     pixel_delta_v,
+                    defocus_disc_uv,
                 };
 
                 Camera { eye, lens }
@@ -79,17 +92,22 @@ impl Camera {
                 pixel0_loc,
                 pixel_delta_u,
                 pixel_delta_v,
+                defocus_disc_uv,
             } => {
+                let origin = if let Some((defocus_disc_u, defocus_disc_v)) = defocus_disc_uv {
+                    let p = random_in_unit_disk();
+                    self.eye.origin + (defocus_disc_u * p.x()) + (defocus_disc_v * p.y())
+                } else {
+                    self.eye.origin
+                };
+
                 let pixel_centre = pixel0_loc
                     + (pixel_delta_u * coord.0 as f64)
                     + (pixel_delta_v * coord.1 as f64);
 
-                let direction = pixel_centre - self.eye.origin;
+                let direction = pixel_centre - origin;
 
-                Ray {
-                    origin: self.eye.origin,
-                    direction,
-                }
+                Ray { origin, direction }
             }
         }
     }
@@ -113,6 +131,22 @@ impl Camera {
                     direction: ray.direction + sample,
                 }
             }
+        }
+    }
+}
+
+fn random_in_unit_disk() -> Vec3 {
+    let dist = rand::distributions::Uniform::new(-1., 1.);
+
+    loop {
+        let p = Vec3::new((
+            rand::thread_rng().sample(dist),
+            rand::thread_rng().sample(dist),
+            0.,
+        ));
+
+        if p.length_squared() < 1. {
+            return p;
         }
     }
 }
