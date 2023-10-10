@@ -13,12 +13,17 @@ pub struct Scene {
 }
 
 impl Scene {
-    pub fn render_pixel(&self, coord: (usize, usize), samples: usize) -> crate::colour::Colour {
+    pub fn render_pixel(
+        &self,
+        coord: (usize, usize),
+        samples: usize,
+        max_bounces: usize,
+    ) -> crate::colour::Colour {
         let mut colour = Colour::black();
 
         for _ in 0..samples {
             let ray = self.camera.screen_to_world_sampled(coord);
-            colour += self.ray_colour(&ray, 10);
+            colour += self.ray_colour(&ray, max_bounces as isize);
         }
 
         colour / (samples as f64)

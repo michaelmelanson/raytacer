@@ -47,13 +47,21 @@ struct CliArguments {
     height: usize,
 
     #[arg(
-        help_heading = "Image",
+        help_heading = "Quality",
         short = 's',
         long = "samples",
         help = "How many rays to trace per pixel",
         default_value = "500"
     )]
     samples_per_pixel: usize,
+
+    #[arg(
+        help_heading = "Quality",
+        long = "max-bounces",
+        help = "How many times a ray can bounce",
+        default_value = "20"
+    )]
+    max_bounces: usize,
 
     #[arg(
         help_heading = "Camera",
@@ -89,7 +97,7 @@ struct CliArguments {
 
     #[arg(
         help_heading = "Camera",
-        long = "defocus_angle",
+        long = "defocus-angle",
         help = "Angle of dispersion for out of focus objects",
         default_value = "0.6"
     )]
@@ -97,7 +105,7 @@ struct CliArguments {
 
     #[arg(
         help_heading = "Camera",
-        long = "focus_distance",
+        long = "focus-distance",
         help = "Fixed focus distance. If not specified, it focuses on 'look-at' point."
     )]
     camera_focus_distance: Option<f64>,
@@ -147,7 +155,7 @@ fn main() {
             let x = index % args.width;
             let y = index / args.width;
 
-            *pixel = scene.render_pixel((x, y), args.samples_per_pixel);
+            *pixel = scene.render_pixel((x, y), args.samples_per_pixel, args.max_bounces);
         });
 
     write_to_png::<RGB>(&args.output_path, &pixels, (args.width, args.height));
