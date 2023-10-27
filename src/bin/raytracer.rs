@@ -175,7 +175,7 @@ fn write_to_png<P: Pixel>(path: &str, pixels: &[Colour], dimensions: (usize, usi
     let mut encoder = png::Encoder::new(writer, dimensions.0 as u32, dimensions.1 as u32);
     encoder.set_color(P::png_color_type());
     encoder.set_depth(P::png_bit_depth());
-    encoder.set_source_gamma(ScaledFloat::new(1.33));
+    encoder.set_srgb(png::SrgbRenderingIntent::Perceptual);
 
     let mut data = Vec::new();
     data.resize(pixels.len() * P::WIDTH, 0);

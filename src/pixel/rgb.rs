@@ -22,9 +22,9 @@ impl super::Pixel for RGB {
 impl From<Colour> for RGB {
     fn from(value: Colour) -> Self {
         Self([
-            (value.r() * 256.0) as u8,
-            (value.g() * 256.0) as u8,
-            (value.b() * 256.0) as u8,
+            (value.r().sqrt() * 256.0) as u8,
+            (value.g().sqrt() * 256.0) as u8,
+            (value.b().sqrt() * 256.0) as u8,
         ])
     }
 }
