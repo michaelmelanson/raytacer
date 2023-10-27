@@ -89,7 +89,7 @@ struct CliArguments {
 
     #[arg(
         help_heading = "Camera",
-        long = "look-at",
+        long = "up",
         help = "Camera up vector in comma-separated X,Y,Z coordinates",
         default_value = "0,1,0"
     )]
